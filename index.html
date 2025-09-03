@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Morse Trainer — One Button</title>
+<style>
+  :root {
+    --bg:#0f1320; --fg:#e8eefc; --muted:#aab4d4;
+    --accent:#6aa0ff; --good:#3ad29f; --bad:#ff6b6b; --card:#171b2b;
+  }
+  html,body {height:100%}
+  body {
+    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: radial-gradient(1000px 600px at 20% 10%, #151a2a, #0b0e18 60%, #060812 100%);
+    color:var(--fg); display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .wrap { max-width: 720px; width:100%; }
+  .card {
+    background:linear-gradient(180deg, #1b2034, #13182a);
+    border:1px solid #2a3151; border-radius:16px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  h1 { font-size:18px; font-weight:600; margin:0; letter-spacing:.2px; color:var(--muted); }
+  .row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  .target {
+    font-size:56px; font-weight:800; padding:8px 18px; border-radius:12px;
+    background:#0f1426; border:1px solid #2a3151; min-width:84px; text-align:center;
+  }
+  .morse-visual { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing:2px; }
+  .pill { padding:6px 10px; border:1px solid #2a3151; border-radius:999px; color:var(--muted); font-size:13px; }
+  .bigbtn {
+    display:block; margin:24px auto 8px; width:220px; height:220px; border-radius:50%;
+    background: radial-gradient(80% 80% at 30% 30%, #2f3b6a, #1c2545); border:2px solid #44528d;
+    box-shadow: 0 12px 40px rgba(83,112,201,.35), inset 0 0 20px rgba(255,255,255,.05);
+    cursor:pointer; position:relative; touch-action:none; user-select:none;
+  }
+  .bigbtn:active, .bigbtn.active { transform: translateY(1px); filter: brightness(1.08); }
+  .bigbtn span { position:absolute; left:0; right:0; bottom:16px; text-align:center; color:#c7d5ff; font-weight:600; opacity:.9 }
+  .center { text-align:center; color:var(--muted) }
+  .io { font-size:26px; margin:6px 0 0; min-height:34px; }
+  .feedback { font-size:18px; margin-top:8px; min-height:24px; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .controls { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+  button.small, .toggle {
+    background:#0f1426; border:1px solid #2a3151; color:var(--fg);
+    padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;
+  }
+  button.small:hover { border-color:#4760a8 }
+  details {
+    margin-top:14px; border-top:1px dashed #2a3151; padding-top:12px; color:var(--muted);
+  }
+  label { font-size:13px; }
+  input[type="range"] { width: 200px; vertical-align: middle; }
+  .score { font-weight:700; color:#cfe0ff }
+  .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding:2px 6px; border:1px solid #2a3151; border-radius:6px; background:#0b1021; color:#d7e3ff; }
+  .legend { display:flex; flex-wrap:wrap; gap:8px; font-size:13px; margin-top:8px; color:#c9d6ff }
+  .legend span { border:1px solid #2a3151; border-radius:8px; padding:2px 6px; background:#0e1428 }
+  .tiny { font-size:12px; color:#93a3d7 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <header>
+      <h1>Morse Trainer — one big button</h1>
+      <div class="pill">• = short tap &nbsp;— = press & hold</div>
+    </header>
+
+    <div class="row" style="margin-top:14px">
+      <div class="target" id="target">A</div>
+      <div>
+        <div class="legend tiny">
+          <span>Letters A–Z</span><span>Spacebar works</span><span>Auto-check after pause</span>
+        </div>
+      </div>
+      <div style="margin-left:auto; text-align:right">
+        <div class="score">Score: <span id="scoreOK">0</span>/<span id="scoreTotal">0</span></div>
+        <div class="tiny" id="streak">Streak: 0</div>
+      </div>
+    </div>
+
+    <button class="bigbtn" id="pressBtn" aria-label="Input button">
+      <span>Press & release</span>
+    </button>
+
+    <div class="center">
+      Your input: <span class="morse-visual io" id="inputView"> </span>
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="controls">
+      <button class="small" id="nextBtn" title="New random letter">Next ↻</button>
+      <button class="small" id="repeatBtn" title="Repeat this letter">Repeat 🔁</button>
+      <button class="small" id="showBtn" title="Reveal the code">Reveal 👀</button>
+      <button class="small" id="resetBtn" title="Reset score">Reset score</button>
+      <label class="toggle"><input id="soundToggle" type="checkbox" /> Beep</label>
+    </div>
+
+    <details>
+      <summary>Fine-tune timing</summary>
+      <div style="margin-top:8px">
+        <label>Dot/Dash threshold:
+          <input type="range" id="threshold" min="120" max="400" value="220" />
+          <span id="thresholdVal">220ms</span>
+        </label>
+        <br/>
+        <label>Pause to auto-check:
+          <input type="range" id="idle" min="500" max="2000" step="50" value="1100" />
+          <span id="idleVal">1100ms</span>
+        </label>
+        <div class="tiny">Tip: shorter threshold makes dots easier; increase if you accidentally make dashes.</div>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const MORSE = {
+    A:".-",   B:"-...", C:"-.-.", D:"-..",  E:".",    F:"..-.",
+    G:"--.",  H:"....", I:"..",   J:".---", K:"-.-",  L:".-..",
+    M:"--",   N:"-.",   O:"---",  P:".--.", Q:"--.-", R:".-.",
+    S:"...",  T:"-",    U:"..-",  V:"...-", W:".--",  X:"-..-",
+    Y:"-.--", Z:"--..",
+    // Uncomment for numbers:
+    // 0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",
+    // 6:"-....",7:"--...",8:"---..",9:"----."
+  };
+  const LETTERS = Object.keys(MORSE);
+
+  const el = (id)=>document.getElementById(id);
+  const targetEl = el('target');
+  const inputView = el('inputView');
+  const feedback = el('feedback');
+  const scoreOK = el('scoreOK');
+  const scoreTotal = el('scoreTotal');
+  const streakEl = el('streak');
+  const pressBtn = el('pressBtn');
+  const nextBtn = el('nextBtn');
+  const repeatBtn = el('repeatBtn');
+  const showBtn = el('showBtn');
+  const resetBtn = el('resetBtn');
+  const thresholdInput = el('threshold');
+  const idleInput = el('idle');
+  const thresholdVal = el('thresholdVal');
+  const idleVal = el('idleVal');
+  const soundToggle = el('soundToggle');
+
+  // state
+  let target = 'A';
+  let expected = MORSE[target];
+  let recording = []; // '.' or '-'
+  let pressStart = 0;
+  let idleTimer = null;
+  let ok=0, total=0, streak=0;
+
+  // audio (simple beep)
+  let audioCtx = null;
+  const tone = (freq=650, dur=100)=>{
+    if(!soundToggle.checked) return;
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur/1000);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    o.stop(audioCtx.currentTime + dur/1000 + 0.02);
+  };
+
+  function setTarget(letter) {
+    target = letter;
+    expected = MORSE[target];
+    targetEl.textContent = target;
+    clearInput();
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+  }
+  function randomLetter(){
+    return LETTERS[Math.floor(Math.random()*LETTERS.length)];
+  }
+  function vis(seq){
+    return (seq||'').replace(/\./g,'•').replace(/-/g,'—');
+  }
+  function clearInput(){
+    recording = [];
+    inputView.textContent = ' ';
+  }
+  function scheduleAutoCheck(){
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(checkAnswer, Number(idleInput.value));
+  }
+  function updateInputView(){
+    inputView.textContent = vis(recording.join(''));
+  }
+  function onPress(){
+    pressStart = performance.now();
+    pressBtn.classList.add('active');
+    tone(700, 60);
+    clearTimeout(idleTimer);
+  }
+  function onRelease(){
+    pressBtn.classList.remove('active');
+    const dur = performance.now() - pressStart;
+    const isDash = dur >= Number(thresholdInput.value);
+    recording.push(isDash ? '-' : '.');
+    updateInputView();
+    tone(isDash? 500:700, isDash? 180:80);
+    scheduleAutoCheck();
+  }
+  function checkAnswer(){
+    clearTimeout(idleTimer);
+    const got = recording.join('');
+    if(!got) { feedback.textContent = '…waiting for input'; return; }
+
+    total++; scoreTotal.textContent = total;
+    if(got === expected){
+      ok++; streak++; feedback.textContent = 'Correct!';
+      feedback.className = 'feedback good';
+    } else {
+      streak = 0;
+      feedback.innerHTML = `Nope. You entered <span class="morse-visual">${vis(got)}</span> which is “${lookupLetter(got) ?? '∅'}”. Expected <span class="morse-visual">${vis(expected)}</span>.`;
+      feedback.className = 'feedback bad';
+    }
+    scoreOK.textContent = ok;
+    streakEl.textContent = `Streak: ${streak}`;
+    // prepare next after a short beat
+    setTimeout(()=>setTarget(randomLetter()), 700);
+  }
+  function lookupLetter(code){
+    for (const [k,v] of Object.entries(MORSE)) if(v===code) return k;
+    return null;
+  }
+
+  // keyboard: Space to press/release
+  let spaceDown=false;
+  window.addEventListener('keydown', (e)=>{
+    if(e.code==='Space' && !spaceDown){
+      e.preventDefault(); spaceDown=true; onPress();
+    }
+  });
+  window.addEventListener('keyup', (e)=>{
+    if(e.code==='Space' && spaceDown){
+      e.preventDefault(); spaceDown=false; onRelease();
+    }
+  });
+
+  // pointer events for the big button (mouse & touch)
+  const startEv = (e)=>{ e.preventDefault(); onPress(); };
+  const endEv = (e)=>{ e.preventDefault(); onRelease(); };
+  pressBtn.addEventListener('pointerdown', startEv);
+  window.addEventListener('pointerup', endEv);
+
+  // controls
+  nextBtn.addEventListener('click', ()=> setTarget(randomLetter()));
+  repeatBtn.addEventListener('click', ()=> { clearInput(); feedback.textContent=''; feedback.className='feedback'; });
+  showBtn.addEventListener('click', ()=>{
+    feedback.innerHTML = `Answer: <span class="morse-visual">${vis(expected)}</span>`;
+    feedback.className = 'feedback';
+  });
+  resetBtn.addEventListener('click', ()=>{
+    ok=0; total=0; streak=0; scoreOK.textContent='0'; scoreTotal.textContent='0'; streakEl.textContent = 'Streak: 0';
+    clearInput(); feedback.textContent=''; feedback.className='feedback';
+  });
+
+  thresholdInput.addEventListener('input', ()=> thresholdVal.textContent = thresholdInput.value + 'ms');
+  idleInput.addEventListener('input', ()=> idleVal.textContent = idleInput.value + 'ms');
+
+  // init
+  thresholdVal.textContent = thresholdInput.value+'ms';
+  idleVal.textContent = idleInput.value+'ms';
+  setTarget(randomLetter());
+})();
+</script>
+</body>
+</html>
