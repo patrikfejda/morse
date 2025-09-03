@@ -1,281 +1,273 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Morse Trainer — One Button</title>
-<style>
-  :root {
-    --bg:#0f1320; --fg:#e8eefc; --muted:#aab4d4;
-    --accent:#6aa0ff; --good:#3ad29f; --bad:#ff6b6b; --card:#171b2b;
-  }
-  html,body {height:100%}
-  body {
-    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: radial-gradient(1000px 600px at 20% 10%, #151a2a, #0b0e18 60%, #060812 100%);
-    color:var(--fg); display:flex; align-items:center; justify-content:center; padding:20px;
-  }
-  .wrap { max-width: 720px; width:100%; }
-  .card {
-    background:linear-gradient(180deg, #1b2034, #13182a);
-    border:1px solid #2a3151; border-radius:16px; padding:20px; box-shadow: 0 10px 30px rgba(0,0,0,.4);
-  }
-  header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  h1 { font-size:18px; font-weight:600; margin:0; letter-spacing:.2px; color:var(--muted); }
-  .row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
-  .target {
-    font-size:56px; font-weight:800; padding:8px 18px; border-radius:12px;
-    background:#0f1426; border:1px solid #2a3151; min-width:84px; text-align:center;
-  }
-  .morse-visual { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing:2px; }
-  .pill { padding:6px 10px; border:1px solid #2a3151; border-radius:999px; color:var(--muted); font-size:13px; }
-  .bigbtn {
-    display:block; margin:24px auto 8px; width:220px; height:220px; border-radius:50%;
-    background: radial-gradient(80% 80% at 30% 30%, #2f3b6a, #1c2545); border:2px solid #44528d;
-    box-shadow: 0 12px 40px rgba(83,112,201,.35), inset 0 0 20px rgba(255,255,255,.05);
-    cursor:pointer; position:relative; touch-action:none; user-select:none;
-  }
-  .bigbtn:active, .bigbtn.active { transform: translateY(1px); filter: brightness(1.08); }
-  .bigbtn span { position:absolute; left:0; right:0; bottom:16px; text-align:center; color:#c7d5ff; font-weight:600; opacity:.9 }
-  .center { text-align:center; color:var(--muted) }
-  .io { font-size:26px; margin:6px 0 0; min-height:34px; }
-  .feedback { font-size:18px; margin-top:8px; min-height:24px; }
-  .feedback.good { color: var(--good); }
-  .feedback.bad { color: var(--bad); }
-  .controls { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
-  button.small, .toggle {
-    background:#0f1426; border:1px solid #2a3151; color:var(--fg);
-    padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;
-  }
-  button.small:hover { border-color:#4760a8 }
-  details {
-    margin-top:14px; border-top:1px dashed #2a3151; padding-top:12px; color:var(--muted);
-  }
-  label { font-size:13px; }
-  input[type="range"] { width: 200px; vertical-align: middle; }
-  .score { font-weight:700; color:#cfe0ff }
-  .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding:2px 6px; border:1px solid #2a3151; border-radius:6px; background:#0b1021; color:#d7e3ff; }
-  .legend { display:flex; flex-wrap:wrap; gap:8px; font-size:13px; margin-top:8px; color:#c9d6ff }
-  .legend span { border:1px solid #2a3151; border-radius:8px; padding:2px 6px; background:#0e1428 }
-  .tiny { font-size:12px; color:#93a3d7 }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Morse Trainer (Ultra Minimal)</title>
+  <style>
+    :root{
+      --bg:#0b1020; --card:#0f1528; --ink:#e7eaf6; --muted:#97a4c9; --ok:#2ecc71; --bad:#ff5d5d; --border:#223056;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      background:var(--bg); color:var(--ink);
+      min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:16px;
+    }
+    .wrap{ width:100%; max-width:640px; display:grid; gap:12px; }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; }
+    .letter{ text-align:center; font-weight:800; font-size: clamp(48px, 12vw, 96px); line-height:1; margin:8px 0 10px; }
+    .bigbtn{
+      width:100%; min-height:90px; border:none; border-radius:14px;
+      background:#101838; color:#fff; font-weight:700; font-size:18px;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,.28); outline:none; touch-action:manipulation;
+      transition:transform .02s ease-in;
+    }
+    .bigbtn:active{ transform: translateY(1px); }
+    .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; letter-spacing:1px }
+    .typed{
+      margin-top:10px; text-align:center; font-size:20px; padding:8px 10px;
+      border-radius:10px; border:1px solid var(--border); background:#0a1122;
+    }
+    .msg{ margin-top:8px; text-align:center; font-weight:700; font-size:16px; min-height:1.6em }
+    .ok{ color:var(--ok) } .bad{ color:var(--bad) }
+
+    /* Hidden panels (Settings/Cheatsheet) */
+    details{ border:1px dashed var(--border); border-radius:12px; background:transparent }
+    details > summary{ list-style:none; cursor:pointer; padding:10px 12px; font-weight:700; color:#cfe0ff }
+    details > summary::-webkit-details-marker{ display:none }
+    details[open]{ border-style:solid }
+    .panel{ padding:12px; border-top:1px dashed var(--border); }
+    input[type=number]{
+      width:100%; padding:10px; border-radius:10px; border:1px solid var(--border);
+      background:#0a1122; color:#fff;
+    }
+    .row{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap }
+    table{ width:100%; border-collapse:collapse; font-size:14px }
+    th,td{ border-bottom:1px solid var(--border); padding:8px 10px; text-align:left }
+    th{ color:#cfe0ff; font-weight:700 }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <header>
-      <h1>Morse Trainer — one big button</h1>
-      <div class="pill">• = short tap &nbsp;— = press & hold</div>
-    </header>
+  <main class="wrap">
+    <!-- MAIN TRAINER (ultra minimal) -->
+    <section class="card">
+      <div class="letter" id="letter">A</div>
 
-    <div class="row" style="margin-top:14px">
-      <div class="target" id="target">A</div>
-      <div>
-        <div class="legend tiny">
-          <span>Letters A–Z</span><span>Spacebar works</span><span>Auto-check after pause</span>
+      <button id="tapBtn" class="bigbtn" aria-label="Input button">
+        Click here
+      </button>
+
+      <div id="typed" class="typed mono">⟂</div>
+      <div id="feedback" class="msg"></div>
+    </section>
+
+    <!-- SETTINGS (hidden) -->
+    <details id="settings">
+      <summary>⚙️ Settings</summary>
+      <div class="panel">
+        <div class="row">
+          <label style="flex:1">
+            <div class="mono" style="color:var(--muted); font-size:13px">Long-press threshold (ms)</div>
+            <input id="threshold" type="number" min="80" max="1500" step="10" value="200">
+          </label>
+          <label style="flex:1">
+            <div class="mono" style="color:var(--muted); font-size:13px">Auto-check after idle (ms)</div>
+            <input id="idleCheck" type="number" min="200" max="3000" step="50" value="800">
+          </label>
+          <label style="flex:1">
+            <div class="mono" style="color:var(--muted); font-size:13px">Auto-next delay (ms)</div>
+            <input id="autoNext" type="number" min="400" max="4000" step="50" value="1200">
+          </label>
         </div>
-      </div>
-      <div style="margin-left:auto; text-align:right">
-        <div class="score">Score: <span id="scoreOK">0</span>/<span id="scoreTotal">0</span></div>
-        <div class="tiny" id="streak">Streak: 0</div>
-      </div>
-    </div>
-
-    <button class="bigbtn" id="pressBtn" aria-label="Input button">
-      <span>Press & release</span>
-    </button>
-
-    <div class="center">
-      Your input: <span class="morse-visual io" id="inputView"> </span>
-      <div id="feedback" class="feedback"></div>
-    </div>
-
-    <div class="controls">
-      <button class="small" id="nextBtn" title="New random letter">Next ↻</button>
-      <button class="small" id="repeatBtn" title="Repeat this letter">Repeat 🔁</button>
-      <button class="small" id="showBtn" title="Reveal the code">Reveal 👀</button>
-      <button class="small" id="resetBtn" title="Reset score">Reset score</button>
-      <label class="toggle"><input id="soundToggle" type="checkbox" /> Beep</label>
-    </div>
-
-    <details>
-      <summary>Fine-tune timing</summary>
-      <div style="margin-top:8px">
-        <label>Dot/Dash threshold:
-          <input type="range" id="threshold" min="120" max="400" value="220" />
-          <span id="thresholdVal">220ms</span>
-        </label>
-        <br/>
-        <label>Pause to auto-check:
-          <input type="range" id="idle" min="500" max="2000" step="50" value="1100" />
-          <span id="idleVal">1100ms</span>
-        </label>
-        <div class="tiny">Tip: shorter threshold makes dots easier; increase if you accidentally make dashes.</div>
       </div>
     </details>
 
-  </div>
-</div>
+    <!-- CHEATSHEET (hidden) -->
+    <details id="cheats">
+      <summary>📖 Cheatsheet</summary>
+      <div class="panel">
+        <div style="overflow:auto">
+          <table>
+            <thead>
+              <tr><th>Písmeno</th><th>Kód</th><th>Pomocné slová</th></tr>
+            </thead>
+            <tbody id="cheatsheetBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </main>
 
-<script>
-(function(){
-  const MORSE = {
-    A:".-",   B:"-...", C:"-.-.", D:"-..",  E:".",    F:"..-.",
-    G:"--.",  H:"....", I:"..",   J:".---", K:"-.-",  L:".-..",
-    M:"--",   N:"-.",   O:"---",  P:".--.", Q:"--.-", R:".-.",
-    S:"...",  T:"-",    U:"..-",  V:"...-", W:".--",  X:"-..-",
-    Y:"-.--", Z:"--..",
-    // Uncomment for numbers:
-    // 0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",
-    // 6:"-....",7:"--...",8:"---..",9:"----."
-  };
-  const LETTERS = Object.keys(MORSE);
+  <script>
+    // --- Data --------------------------------------------------------------
+    const MORSE = [
+      { L:"A",  C:".-",    M:"akát" },
+      { L:"B",  C:"-...",  M:"blýskavice" },
+      { L:"C",  C:"-.-.",  M:"cílovníci" },
+      { L:"D",  C:"-..",   M:"dálava" },
+      { L:"E",  C:".",     M:"erb" },
+      { L:"F",  C:"..-.",  M:"Filipíny" },
+      { L:"G",  C:"--.",   M:"Grónská zem" },
+      { L:"H",  C:"....",  M:"hrachovina" },
+      { L:"CH", C:"----",  M:"chléb nám dává" },
+      { L:"I",  C:"..",    M:"ibis" },
+      { L:"J",  C:".---",  M:"jasmín bílý" },
+      { L:"K",  C:"-.-",   M:"krákorá" },
+      { L:"L",  C:".-..",  M:"lupíneček" },
+      { L:"M",  C:"--",    M:"mává" },
+      { L:"N",  C:"-.",    M:"národ" },
+      { L:"O",  C:"---",   M:"ó náš pán" },
+      { L:"P",  C:".--.",  M:"papírníci" },
+      { L:"Q",  C:"--.-",  M:"kvílí orkán" },
+      { L:"R",  C:".-.",   M:"rarášek" },
+      { L:"S",  C:"...",   M:"sobota" },
+      { L:"T",  C:"-",     M:"tón" },
+      { L:"U",  C:"..-",   M:"učený" },
+      { L:"V",  C:"...-",  M:"vyvolený" },
+      { L:"W",  C:".--",   M:"dvojté vé" },
+      { L:"X",  C:"-..-",  M:"Xénokratés" },
+      { L:"Y",  C:"-.--",  M:"Ýkar mává" },
+      { L:"Z",  C:"--..",  M:"zrádná žena" },
+    ];
+    const CODE_TO_LETTER = Object.fromEntries(MORSE.map(x => [x.C, x.L]));
 
-  const el = (id)=>document.getElementById(id);
-  const targetEl = el('target');
-  const inputView = el('inputView');
-  const feedback = el('feedback');
-  const scoreOK = el('scoreOK');
-  const scoreTotal = el('scoreTotal');
-  const streakEl = el('streak');
-  const pressBtn = el('pressBtn');
-  const nextBtn = el('nextBtn');
-  const repeatBtn = el('repeatBtn');
-  const showBtn = el('showBtn');
-  const resetBtn = el('resetBtn');
-  const thresholdInput = el('threshold');
-  const idleInput = el('idle');
-  const thresholdVal = el('thresholdVal');
-  const idleVal = el('idleVal');
-  const soundToggle = el('soundToggle');
+    // Cheatsheet build
+    const cheatsheetBody = document.getElementById('cheatsheetBody');
+    MORSE.forEach(({L,C,M})=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${L}</td><td class="mono">${C}</td><td>${M}</td>`;
+      cheatsheetBody.appendChild(tr);
+    });
 
-  // state
-  let target = 'A';
-  let expected = MORSE[target];
-  let recording = []; // '.' or '-'
-  let pressStart = 0;
-  let idleTimer = null;
-  let ok=0, total=0, streak=0;
+    // --- Elements ----------------------------------------------------------
+    const elLetter   = document.getElementById('letter');
+    const elTyped    = document.getElementById('typed');
+    const elTap      = document.getElementById('tapBtn');
+    const elFeedback = document.getElementById('feedback');
 
-  // audio (simple beep)
-  let audioCtx = null;
-  const tone = (freq=650, dur=100)=>{
-    if(!soundToggle.checked) return;
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = 'sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0.001, audioCtx.currentTime);
-    g.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur/1000);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    o.stop(audioCtx.currentTime + dur/1000 + 0.02);
-  };
+    const elThreshold= document.getElementById('threshold');
+    const elIdle     = document.getElementById('idleCheck');
+    const elNext     = document.getElementById('autoNext');
 
-  function setTarget(letter) {
-    target = letter;
-    expected = MORSE[target];
-    targetEl.textContent = target;
-    clearInput();
-    feedback.textContent = '';
-    feedback.className = 'feedback';
-  }
-  function randomLetter(){
-    return LETTERS[Math.floor(Math.random()*LETTERS.length)];
-  }
-  function vis(seq){
-    return (seq||'').replace(/\./g,'•').replace(/-/g,'—');
-  }
-  function clearInput(){
-    recording = [];
-    inputView.textContent = ' ';
-  }
-  function scheduleAutoCheck(){
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(checkAnswer, Number(idleInput.value));
-  }
-  function updateInputView(){
-    inputView.textContent = vis(recording.join(''));
-  }
-  function onPress(){
-    pressStart = performance.now();
-    pressBtn.classList.add('active');
-    tone(700, 60);
-    clearTimeout(idleTimer);
-  }
-  function onRelease(){
-    pressBtn.classList.remove('active');
-    const dur = performance.now() - pressStart;
-    const isDash = dur >= Number(thresholdInput.value);
-    recording.push(isDash ? '-' : '.');
-    updateInputView();
-    tone(isDash? 500:700, isDash? 180:80);
-    scheduleAutoCheck();
-  }
-  function checkAnswer(){
-    clearTimeout(idleTimer);
-    const got = recording.join('');
-    if(!got) { feedback.textContent = '…waiting for input'; return; }
+    // --- State -------------------------------------------------------------
+    let thresholdMs = parseInt(localStorage.getItem('morse.thresholdMs') || '200', 10);
+    let idleCheckMs = parseInt(localStorage.getItem('morse.idleCheckMs') || '800', 10);
+    let autoNextMs  = parseInt(localStorage.getItem('morse.autoNextMs')  || '1200',10);
 
-    total++; scoreTotal.textContent = total;
-    if(got === expected){
-      ok++; streak++; feedback.textContent = 'Correct!';
-      feedback.className = 'feedback good';
-    } else {
-      streak = 0;
-      feedback.innerHTML = `Nope. You entered <span class="morse-visual">${vis(got)}</span> which is “${lookupLetter(got) ?? '∅'}”. Expected <span class="morse-visual">${vis(expected)}</span>.`;
-      feedback.className = 'feedback bad';
+    elThreshold.value = thresholdMs;
+    elIdle.value = idleCheckMs;
+    elNext.value = autoNextMs;
+
+    let current = { L:"A", C:".-" };
+    let typed = "";
+    let pressStartedAt = null;
+    let locked = false;
+    let checkTimer = null;
+    let nextTimer  = null;
+
+    // --- Helpers -----------------------------------------------------------
+    const randLetter = () => MORSE[Math.floor(Math.random()*MORSE.length)];
+    function resetInput(clearMsg=false){
+      typed = ""; elTyped.textContent = "⟂";
+      if (clearMsg){ elFeedback.textContent=""; elFeedback.className="msg"; }
+      if (checkTimer){ clearTimeout(checkTimer); checkTimer=null; }
     }
-    scoreOK.textContent = ok;
-    streakEl.textContent = `Streak: ${streak}`;
-    // prepare next after a short beat
-    setTimeout(()=>setTarget(randomLetter()), 700);
-  }
-  function lookupLetter(code){
-    for (const [k,v] of Object.entries(MORSE)) if(v===code) return k;
-    return null;
-  }
-
-  // keyboard: Space to press/release
-  let spaceDown=false;
-  window.addEventListener('keydown', (e)=>{
-    if(e.code==='Space' && !spaceDown){
-      e.preventDefault(); spaceDown=true; onPress();
+    function showTarget(t){
+      current = t;
+      elLetter.textContent = t.L;
+      locked = false;
+      resetInput(true);
+      if (nextTimer){ clearTimeout(nextTimer); nextTimer=null; }
     }
-  });
-  window.addEventListener('keyup', (e)=>{
-    if(e.code==='Space' && spaceDown){
-      e.preventDefault(); spaceDown=false; onRelease();
+    function scheduleAutoCheck(){
+      if (checkTimer){ clearTimeout(checkTimer); }
+      checkTimer = setTimeout(()=>{ checkTimer=null; checkAnswer(); }, idleCheckMs);
     }
-  });
+    function appendSymbol(sym){
+      if (locked) return;
+      typed += sym;
+      elTyped.textContent = typed;
+      scheduleAutoCheck();
+    }
+    const labelFor = (code) => CODE_TO_LETTER[code] || "—";
 
-  // pointer events for the big button (mouse & touch)
-  const startEv = (e)=>{ e.preventDefault(); onPress(); };
-  const endEv = (e)=>{ e.preventDefault(); onRelease(); };
-  pressBtn.addEventListener('pointerdown', startEv);
-  window.addEventListener('pointerup', endEv);
+    function checkAnswer(){
+      if (locked) return;
+      if (!typed){
+        elFeedback.textContent = "Enter at least one tap/hold.";
+        elFeedback.className = "msg bad";
+        return;
+      }
+      const ok = (typed === current.C);
+      if (ok){
+        elFeedback.innerHTML = `✅ Correct! <strong>${current.L}</strong> is <span class="mono">${current.C}</span>.`;
+        elFeedback.className = "msg ok";
+      }else{
+        const enteredLabel = labelFor(typed);
+        elFeedback.innerHTML =
+          `❌ Incorrect. Expected <span class="mono">${current.C}</span> for <strong>${current.L}</strong>, ` +
+          `you entered <span class="mono">${typed}</span>` +
+          (enteredLabel !== "—" ? ` (<strong>${enteredLabel}</strong>)` : ``) + `.`;
+        elFeedback.className = "msg bad";
+      }
+      locked = true;
+      if (nextTimer){ clearTimeout(nextTimer); }
+      nextTimer = setTimeout(()=>{ showTarget(randLetter()); }, autoNextMs);
+    }
 
-  // controls
-  nextBtn.addEventListener('click', ()=> setTarget(randomLetter()));
-  repeatBtn.addEventListener('click', ()=> { clearInput(); feedback.textContent=''; feedback.className='feedback'; });
-  showBtn.addEventListener('click', ()=>{
-    feedback.innerHTML = `Answer: <span class="morse-visual">${vis(expected)}</span>`;
-    feedback.className = 'feedback';
-  });
-  resetBtn.addEventListener('click', ()=>{
-    ok=0; total=0; streak=0; scoreOK.textContent='0'; scoreTotal.textContent='0'; streakEl.textContent = 'Streak: 0';
-    clearInput(); feedback.textContent=''; feedback.className='feedback';
-  });
+    // --- Settings handlers -------------------------------------------------
+    elThreshold.addEventListener('input', ()=>{
+      const v = parseInt(elThreshold.value,10);
+      thresholdMs = isFinite(v) ? Math.min(1500, Math.max(80, v)) : 200;
+      elThreshold.value = thresholdMs;
+      localStorage.setItem('morse.thresholdMs', String(thresholdMs));
+    });
+    elIdle.addEventListener('input', ()=>{
+      const v = parseInt(elIdle.value,10);
+      idleCheckMs = isFinite(v) ? Math.min(3000, Math.max(200, v)) : 800;
+      elIdle.value = idleCheckMs;
+      localStorage.setItem('morse.idleCheckMs', String(idleCheckMs));
+      if (!locked && typed){ scheduleAutoCheck(); }
+    });
+    elNext.addEventListener('input', ()=>{
+      const v = parseInt(elNext.value,10);
+      autoNextMs = isFinite(v) ? Math.min(4000, Math.max(400, v)) : 1200;
+      elNext.value = autoNextMs;
+      localStorage.setItem('morse.autoNextMs', String(autoNextMs));
+    });
 
-  thresholdInput.addEventListener('input', ()=> thresholdVal.textContent = thresholdInput.value + 'ms');
-  idleInput.addEventListener('input', ()=> idleVal.textContent = idleInput.value + 'ms');
+    // --- Input events ------------------------------------------------------
+    function startPress(){
+      if (locked || pressStartedAt !== null) return;
+      pressStartedAt = performance.now();
+      elTap.style.transform = "translateY(1px)";
+    }
+    function endPress(){
+      if (locked || pressStartedAt === null) return;
+      const dur = performance.now() - pressStartedAt;
+      pressStartedAt = null;
+      elTap.style.transform = "translateY(0)";
+      appendSymbol(dur >= thresholdMs ? "-" : ".");
+    }
 
-  // init
-  thresholdVal.textContent = thresholdInput.value+'ms';
-  idleVal.textContent = idleInput.value+'ms';
-  setTarget(randomLetter());
-})();
-</script>
+    elTap.addEventListener('pointerdown', (e)=>{ e.preventDefault(); startPress(); });
+    elTap.addEventListener('pointerup',   (e)=>{ e.preventDefault(); endPress(); });
+    elTap.addEventListener('pointercancel',(e)=>{ e.preventDefault(); pressStartedAt=null; elTap.style.transform="translateY(0)"; });
+
+    // Keyboard still works (not shown on UI)
+    let spaceIsDown = false;
+    window.addEventListener('keydown', (e)=>{
+      if (e.repeat) return;
+      if (e.code === 'Space'){ e.preventDefault(); spaceIsDown=true; startPress(); }
+      else if (e.code === 'Backspace'){ e.preventDefault(); resetInput(true); }
+    });
+    window.addEventListener('keyup', (e)=>{
+      if (e.code === 'Space'){ e.preventDefault(); if (spaceIsDown){ endPress(); spaceIsDown=false; } }
+    });
+
+    // --- Init --------------------------------------------------------------
+    showTarget(randLetter());
+  </script>
 </body>
 </html>
